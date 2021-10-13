@@ -13,14 +13,12 @@
   "scripts": {
     "cm": "npx git-cz",
     "build": "lerna run build:viewer --stream",
-    "build:xnat": "lerna run build:viewer:xnat --stream",
     "build:lt": "lerna run build:viewer:lesion-tracker --stream",
     "build:ci": "lerna run build:viewer:ci --stream",
     "build:demo": "lerna run build:viewer:demo --stream",
     "build:package": "lerna run build:viewer:package --stream",
     "build:package-all": "lerna run build:package --parallel --stream",
     "dev": "lerna run dev:viewer --stream",
-    "dev:xnat": "lerna run dev:viewer:xnat --stream",
     "dev:lt": "lerna run dev:viewer:lesion-tracker --stream",
     "dev:project": ".scripts/dev.sh",
     "dev:orthanc": "lerna run dev:orthanc --stream",
@@ -30,20 +28,22 @@
     "test:unit": "jest --collectCoverage",
     "test:unit:ci": "lerna run test:unit:ci --parallel --stream",
     "test:e2e": "lerna run test:e2e --stream",
+    "test:e2e:script-tag": "lerna run test:e2e:script-tag --stream",
     "test:e2e:ci": "lerna run test:e2e:ci --stream",
     "test:e2e:dist": "lerna run test:e2e:dist --stream",
     "test:e2e:serve": "lerna run test:e2e:serve --stream",
     "see-changed": "lerna changed",
     "docs:publish": "chmod +x ./build-and-publish-docs.sh && ./build-and-publish-docs.sh",
     "release": "yarn run lerna:version && yarn run lerna:publish",
+    "lerna:cache": "./netlify-lerna-cache.sh",
+    "lerna:restore": "./netlify-lerna-restore.sh",
     "lerna:version": "npx lerna version prerelease --force-publish",
     "lerna:publish": "lerna publish from-package --canary --dist-tag canary",
     "link-list": "npm ls --depth=0 --link=true"
   },
   "dependencies": {
     "@babel/runtime": "^7.5.5",
-    "core-js": "^3.2.1",
-    "cornerstone-tools": "https://bitbucket.org/icrimaginginformatics/cornerstonetools.git"
+    "core-js": "^3.2.1"
   },
   "devDependencies": {
     "@babel/core": "^7.5.0",

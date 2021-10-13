@@ -6,8 +6,6 @@ import i18n from '@ohif/i18n';
 import { TabFooter, LanguageSwitcher, useSnackbarContext } from '@ohif/ui';
 import { useTranslation } from 'react-i18next';
 
-import { stackSynchronizer } from '@xnat-ohif/extension-xnat';
-
 import './GeneralPreferences.styl';
 
 /**
@@ -25,23 +23,12 @@ function GeneralPreferences({ onClose }) {
 
   const [language, setLanguage] = useState(currentLanguage);
 
-  const syncStrategies = [
-    'Index',
-    'Position',
-  ];
-
-  const [syncStrategy, setSyncStrategy] = useState(
-    stackSynchronizer.sycStrategy
-  );
-
   const onResetPreferences = () => {
     setLanguage(i18n.defaultLanguage);
   };
 
   const onSave = () => {
     i18n.changeLanguage(language);
-
-    stackSynchronizer.changeSynchronizationStrategy(syncStrategy);
 
     onClose();
 
@@ -56,8 +43,8 @@ function GeneralPreferences({ onClose }) {
   return (
     <React.Fragment>
       <div className="GeneralPreferences">
-        <div className="generalItem">
-          <label htmlFor="language-select" className="generalLabel">
+        <div className="language">
+          <label htmlFor="language-select" className="languageLabel">
             Language
           </label>
           <LanguageSwitcher
@@ -65,24 +52,6 @@ function GeneralPreferences({ onClose }) {
             onLanguageChange={setLanguage}
             languages={availableLanguages}
           />
-        </div>
-        <h2>Stack Scroll Synchronization Settings</h2>
-        <hr />
-        <div className="generalItem">
-          <label htmlFor="sync-strategy-select" className="generalLabel">
-            Sync Method
-          </label>
-          <select
-            id="sync-strategy-select"
-            value={syncStrategy}
-            onChange={({target}) => setSyncStrategy(target.value)}
-          >
-            {syncStrategies.map((strategy, key) => (
-              <option key={key} value={strategy}>
-                {strategy}
-              </option>
-            ))}
-          </select>
         </div>
       </div>
       <TabFooter

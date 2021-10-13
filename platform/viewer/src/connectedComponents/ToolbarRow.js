@@ -18,8 +18,6 @@ import ConnectedCineDialog from './ConnectedCineDialog';
 import ConnectedLayoutButton from './ConnectedLayoutButton';
 import { withAppContext } from '../context/AppContext';
 
-import store from '../store';
-
 class ToolbarRow extends Component {
   // TODO: Simplify these? isOpen can be computed if we say "any" value for selected,
   // closed if selected is null/undefined
@@ -35,7 +33,6 @@ class ToolbarRow extends Component {
     // NOTE: withDialog, withModal HOCs
     dialog: PropTypes.any,
     modal: PropTypes.any,
-    preferences: PropTypes.object
   };
 
   static defaultProps = {
@@ -62,6 +59,9 @@ class ToolbarRow extends Component {
     this.seriesPerStudyCount = [];
 
     this._handleBuiltIn = _handleBuiltIn.bind(this);
+    this._onDerivedDisplaySetsLoadedAndCached = this._onDerivedDisplaySetsLoadedAndCached.bind(
+      this
+    );
 
     this.updateButtonGroups();
   }
@@ -89,13 +89,15 @@ class ToolbarRow extends Component {
         // Note: This does not cleanly handle `studies` prop updating with panel open
         const isDisabled =
           typeof menuOption.isDisabled === 'function' &&
-          menuOption.isDisabled(this.props.studies);
+          menuOption.isDisabled(this.props.studies, this.props.activeViewport);
 
         if (hasActiveContext && !isDisabled) {
           const menuOptionEntry = {
             value: menuOption.target,
             icon: menuOption.icon,
             bottomLabel: menuOption.label,
+            badgeNumber: menuOption.badgeNumber,
+            stateEvent: menuOption.stateEvent,
           };
           const from = menuOption.from || 'right';
 
@@ -105,11 +107,37 @@ class ToolbarRow extends Component {
     });
 
     // TODO: This should come from extensions, instead of being baked in
-    // this.buttonGroups.left.unshift({
-    //   value: 'studies',
-    //   icon: 'th-large',
-    //   bottomLabel: this.props.t('Series'),
-    // });
+    this.buttonGroups.left.unshift({
+      value: 'studies',
+      icon: 'th-large',
+      bottomLabel: this.props.t('Series'),
+    });
+  }
+
+  componentDidMount() {
+    /*
+     * TODO: Improve the way we notify parts of the app
+     * that depends on derived display sets to be loaded.
+     * (Implement pubsub for better tracking of derived display sets)
+     */
+    document.addEventListener(
+      'deriveddisplaysetsloadedandcached',
+      this._onDerivedDisplaySetsLoadedAndCached
+    );
+  }
+
+  componentWillUnmount() {
+    document.removeEventListener(
+      'deriveddisplaysetsloadedandcached',
+      this._onDerivedDisplaySetsLoadedAndCached
+    );
+  }
+
+  _onDerivedDisplaySetsLoadedAndCached() {
+    this.updateButtonGroups();
+    this.setState({
+      toolbarButtons: _getVisibleToolbarButtons.call(this),
+    });
   }
 
   componentDidUpdate(prevProps) {
@@ -117,25 +145,30 @@ class ToolbarRow extends Component {
       prevProps.activeContexts !== this.props.activeContexts;
 
     const prevStudies = prevProps.studies;
+    const prevActiveViewport = prevProps.activeViewport;
+    const activeViewport = this.props.activeViewport;
     const studies = this.props.studies;
     const seriesPerStudyCount = this.seriesPerStudyCount;
 
-    let studiesUpdated = false;
+    let shouldUpdate = false;
 
-    if (prevStudies.length !== studies.length) {
-      studiesUpdated = true;
+    if (
+      prevStudies.length !== studies.length ||
+      prevActiveViewport !== activeViewport
+    ) {
+      shouldUpdate = true;
     } else {
       for (let i = 0; i < studies.length; i++) {
         if (studies[i].series.length !== seriesPerStudyCount[i]) {
           seriesPerStudyCount[i] = studies[i].series.length;
 
-          studiesUpdated = true;
+          shouldUpdate = true;
           break;
         }
       }
     }
 
-    if (studiesUpdated) {
+    if (shouldUpdate) {
       this.updateButtonGroups();
     }
 
@@ -173,9 +206,6 @@ class ToolbarRow extends Component {
       this.state.activeButtons
     );
 
-    const showLayoutButton =
-      this.props.activeContexts.includes('ACTIVE_VIEWPORT::CORNERSTONE');
-
     const onPress = (side, value) => {
       this.props.handleSidePanelChange(side, value);
     };
@@ -192,8 +222,8 @@ class ToolbarRow extends Component {
               onValueChanged={onPressLeft}
             />
           </div>
-          {showLayoutButton && <ConnectedLayoutButton />}
           {buttonComponents}
+          <ConnectedLayoutButton />
           <div
             className="pull-right m-t-1 rm-x-1"
             style={{ marginLeft: 'auto' }}
@@ -246,25 +276,6 @@ function _getExpandableButtonComponent(button, activeButtons) {
     }
 
     return childButton;
-  }).filter(button => {
-    let isEnabled = true;
-    if ('experimentalFeature' in button) {
-      const { experimentalFeatures = {} } = this.props.preferences;
-      const feature = Object.keys(experimentalFeatures).filter(key => {
-        return (experimentalFeatures[key].id === button.id)
-          && experimentalFeatures[key].enabled;
-      })[0];
-
-      isEnabled = feature !== undefined;
-    }
-
-    if (!isEnabled && activeCommand === button.id) {
-      activeCommand = undefined;
-      // Update activeTool ins store
-      store.dispatch({type: 'SET_ACTIVE_TOOL', activeTool: 'Wwwc'});
-    }
-
-    return isEnabled;
   });
 
   return (
@@ -280,13 +291,13 @@ function _getExpandableButtonComponent(button, activeButtons) {
 
 function _getDefaultButtonComponent(button, activeButtons) {
   return (
-      <ToolbarButton
-        key={button.id}
-        label={button.label}
-        icon={button.icon}
-        onClick={_handleToolbarButtonClick.bind(this, button)}
-        isActive={activeButtons.map(button => button.id).includes(button.id)}
-      />
+    <ToolbarButton
+      key={button.id}
+      label={button.label}
+      icon={button.icon}
+      onClick={_handleToolbarButtonClick.bind(this, button)}
+      isActive={activeButtons.map(button => button.id).includes(button.id)}
+    />
   );
 }
 /**
@@ -339,8 +350,6 @@ function _handleToolbarButtonClick(button, evt, props) {
       ({ options }) => options && !options.togglable
     );
     this.setState({ activeButtons: [...toggables, button] });
-    // Update activeTool ins store
-    store.dispatch({type: 'SET_ACTIVE_TOOL', activeTool: button.commandOptions.toolName});
   } else if (button.type === 'builtIn') {
     this._handleBuiltIn(button);
   }

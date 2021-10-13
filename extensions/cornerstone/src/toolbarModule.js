@@ -72,6 +72,33 @@ const definitions = [
     commandOptions: { toolName: 'Pan' },
   },
   {
+    id: 'Length',
+    label: 'Length',
+    icon: 'measure-temp',
+    //
+    type: TOOLBAR_BUTTON_TYPES.SET_TOOL_ACTIVE,
+    commandName: 'setToolActive',
+    commandOptions: { toolName: 'Length' },
+  },
+  {
+    id: 'ArrowAnnotate',
+    label: 'Annotate',
+    icon: 'measure-non-target',
+    //
+    type: TOOLBAR_BUTTON_TYPES.SET_TOOL_ACTIVE,
+    commandName: 'setToolActive',
+    commandOptions: { toolName: 'ArrowAnnotate' },
+  },
+  {
+    id: 'Angle',
+    label: 'Angle',
+    icon: 'angle-left',
+    //
+    type: TOOLBAR_BUTTON_TYPES.SET_TOOL_ACTIVE,
+    commandName: 'setToolActive',
+    commandOptions: { toolName: 'Angle' },
+  },
+  {
     id: 'Reset',
     label: 'Reset',
     icon: 'reset',
@@ -90,77 +117,8 @@ const definitions = [
     },
   },
   {
-    id: 'Annotations',
-    label: 'Annotations',
-    icon: 'xnat-annotations',
-    buttons: [
-      {
-        id: 'Length',
-        label: 'Length',
-        icon: 'measure-temp',
-        //
-        type: TOOLBAR_BUTTON_TYPES.SET_TOOL_ACTIVE,
-        commandName: 'setToolActive',
-        commandOptions: { toolName: 'Length' },
-      },
-      {
-        id: 'ArrowAnnotate',
-        label: 'Annotate',
-        icon: 'measure-non-target',
-        //
-        type: TOOLBAR_BUTTON_TYPES.SET_TOOL_ACTIVE,
-        commandName: 'setToolActive',
-        commandOptions: { toolName: 'ArrowAnnotate' },
-      },
-      {
-        id: 'Angle',
-        label: 'Angle',
-        icon: 'angle-left',
-        //
-        type: TOOLBAR_BUTTON_TYPES.SET_TOOL_ACTIVE,
-        commandName: 'setToolActive',
-        commandOptions: { toolName: 'Angle' },
-      },
-      {
-        id: 'Bidirectional',
-        label: 'Bidirectional',
-        icon: 'measure-target',
-        //
-        type: TOOLBAR_BUTTON_TYPES.SET_TOOL_ACTIVE,
-        commandName: 'setToolActive',
-        commandOptions: { toolName: 'Bidirectional' },
-      },
-      {
-        id: 'EllipticalRoi',
-        label: 'Ellipse',
-        icon: 'circle-o',
-        //
-        type: TOOLBAR_BUTTON_TYPES.SET_TOOL_ACTIVE,
-        commandName: 'setToolActive',
-        commandOptions: { toolName: 'EllipticalRoi' },
-      },
-      {
-        id: 'RectangleRoi',
-        label: 'Rectangle',
-        icon: 'square-o',
-        //
-        type: TOOLBAR_BUTTON_TYPES.SET_TOOL_ACTIVE,
-        commandName: 'setToolActive',
-        commandOptions: { toolName: 'RectangleRoi' },
-      },
-      {
-        id: 'Clear',
-        label: 'Clear',
-        icon: 'trash',
-        //
-        type: TOOLBAR_BUTTON_TYPES.COMMAND,
-        commandName: 'clearAnnotations',
-      },
-    ],
-  },
-  {
-    id: 'Tools',
-    label: 'Tools',
+    id: 'More',
+    label: 'More',
     icon: 'ellipse-circle',
     buttons: [
       {
@@ -190,13 +148,24 @@ const definitions = [
         commandName: 'setToolActive',
         commandOptions: { toolName: 'DragProbe' },
       },
-    ],
-  },
-  {
-    id: 'Commands',
-    label: 'Commands',
-    icon: 'ellipse-circle',
-    buttons: [
+      {
+        id: 'EllipticalRoi',
+        label: 'Ellipse',
+        icon: 'circle-o',
+        //
+        type: TOOLBAR_BUTTON_TYPES.SET_TOOL_ACTIVE,
+        commandName: 'setToolActive',
+        commandOptions: { toolName: 'EllipticalRoi' },
+      },
+      {
+        id: 'RectangleRoi',
+        label: 'Rectangle',
+        icon: 'square-o',
+        //
+        type: TOOLBAR_BUTTON_TYPES.SET_TOOL_ACTIVE,
+        commandName: 'setToolActive',
+        commandOptions: { toolName: 'RectangleRoi' },
+      },
       {
         id: 'Invert',
         label: 'Invert',
@@ -230,8 +199,25 @@ const definitions = [
         commandName: 'flipViewportVertical',
       },
       {
-        id: 'Snapshot',
-        label: 'Snapshot',
+        id: 'Clear',
+        label: 'Clear',
+        icon: 'trash',
+        //
+        type: TOOLBAR_BUTTON_TYPES.COMMAND,
+        commandName: 'clearAnnotations',
+      },
+      {
+        id: 'Bidirectional',
+        label: 'Bidirectional',
+        icon: 'measure-target',
+        //
+        type: TOOLBAR_BUTTON_TYPES.SET_TOOL_ACTIVE,
+        commandName: 'setToolActive',
+        commandOptions: { toolName: 'Bidirectional' },
+      },
+      {
+        id: 'Download',
+        label: 'Download',
         icon: 'create-screen-capture',
         //
         type: TOOLBAR_BUTTON_TYPES.BUILT_IN,

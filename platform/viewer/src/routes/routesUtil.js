@@ -1,6 +1,6 @@
 import { asyncComponent, retryImport } from '@ohif/ui';
-
 import OHIF from '@ohif/core';
+
 const { urlUtil: UrlUtil } = OHIF.utils;
 
 // Dynamic Import Routes (CodeSplitting)
@@ -12,40 +12,24 @@ const IHEInvokeImageDisplay = asyncComponent(() =>
 const ViewerRouting = asyncComponent(() =>
   retryImport(() => import(/* webpackChunkName: "ViewerRouting" */ './ViewerRouting.js'))
 );
+
 const StudyListRouting = asyncComponent(() =>
   retryImport(() => import(
     /* webpackChunkName: "StudyListRouting" */ '../studylist/StudyListRouting.js'
-    ))
+  ))
 );
 const StandaloneRouting = asyncComponent(() =>
   retryImport(() => import(
     /* webpackChunkName: "ConnectedStandaloneRouting" */ '../connectedComponents/ConnectedStandaloneRouting.js'
-    ))
+  ))
 );
 const ViewerLocalFileData = asyncComponent(() =>
   retryImport(() => import(
     /* webpackChunkName: "ViewerLocalFileData" */ '../connectedComponents/ViewerLocalFileData.js'
-    ))
-);
-const XNATStandaloneRouting = asyncComponent(() =>
-  retryImport(() => import(
-    /* webpackChunkName: "ConnectedXNATStandaloneRouting" */ '../connectedComponents/ConnectedXNATStandaloneRouting.js'
   ))
 );
 
-
 const reload = () => window.location.reload();
-
-// Define XNAT Route based on URL/Context configuration
-const xnatRoute = () => {
-  const href = window.location.href;
-  const origin = window.location.origin;
-  let xnatRoute = href.split('/VIEWER')[0];
-
-  xnatRoute = xnatRoute.replace(origin, '');
-  xnatRoute += '/VIEWER';
-  return xnatRoute;
-};
 
 const ROUTES_DEF = {
   default: {
@@ -53,13 +37,9 @@ const ROUTES_DEF = {
       path: '/viewer/:studyInstanceUIDs',
       component: ViewerRouting,
     },
-    // standaloneViewer: {
-    //   path: '/sa_viewer',
-    //   component: StandaloneRouting,
-    // },
-    XNATstandaloneViewer: {
-      path: xnatRoute(),
-      component: XNATStandaloneRouting,
+    standaloneViewer: {
+      path: '/viewer',
+      component: StandaloneRouting,
     },
     list: {
       path: ['/studylist', '/'],
@@ -72,10 +52,10 @@ const ROUTES_DEF = {
       path: '/local',
       component: ViewerLocalFileData,
     },
-    // IHEInvokeImageDisplay: {
-    //   path: '/IHEInvokeImageDisplay',
-    //   component: IHEInvokeImageDisplay
-    // },
+    IHEInvokeImageDisplay: {
+      path: '/IHEInvokeImageDisplay',
+      component: IHEInvokeImageDisplay
+    },
   },
   gcloud: {
     viewer: {

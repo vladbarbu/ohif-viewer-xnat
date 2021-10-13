@@ -19,7 +19,6 @@ import {
   TableList,
   TableListItem,
   Thumbnail,
-  ImageThumbnail,
   TabComponents,
   TabFooter,
   HotkeyField,
@@ -67,6 +66,9 @@ import {
   ModalConsumer,
   useModal,
   withModal,
+  LoggerProvider,
+  withLogger,
+  useLogger,
 } from './contextProviders';
 
 export {
@@ -104,7 +106,6 @@ export {
   TableList,
   TableListItem,
   Thumbnail,
-  ImageThumbnail,
   TabComponents,
   TabFooter,
   HotkeyField,
@@ -129,11 +130,14 @@ export {
   useDialog,
   ErrorBoundary,
   ErrorPage,
+  LoggerProvider,
+  withLogger,
+  useLogger,
   // Hooks
   useDebounce,
   useMedia,
   // Utils
   ViewerbaseDragDropContext,
   asyncComponent,
-  retryImport
+  retryImport,
 };

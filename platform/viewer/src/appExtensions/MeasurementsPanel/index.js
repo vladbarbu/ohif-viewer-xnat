@@ -9,13 +9,14 @@ export default {
    * Only required property. Should be a unique value across all extensions.
    */
   id: 'measurements-table',
+  get version() {
+    return window.version;
+  },
 
   preRegistration({ servicesManager, commandsManager, configuration = {} }) {
     init({ servicesManager, commandsManager, configuration });
   },
 
-  // In XNAT We don't use the measurements panel yet
-  /*
   getPanelModule({ servicesManager, commandsManager }) {
     const { UINotificationService, UIDialogService } = servicesManager.services;
 
@@ -86,5 +87,4 @@ export default {
       defaultContext: ['VIEWER'],
     };
   },
-  */
 };

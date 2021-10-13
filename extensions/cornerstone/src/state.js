@@ -1,6 +1,5 @@
 const state = {
   enabledElements: {},
-  activeViewportIndex: -1,
 };
 
 /**
@@ -18,15 +17,4 @@ const setEnabledElement = (viewportIndex, element) =>
  */
 const getEnabledElement = viewportIndex => state.enabledElements[viewportIndex];
 
-const setActiveViewportIndex = viewportIndex => {
-  state.activeViewportIndex = viewportIndex;
-}
-
-const getActiveViewportIndex = () => state.activeViewportIndex;
-
-export {
-  setEnabledElement,
-  getEnabledElement,
-  setActiveViewportIndex,
-  getActiveViewportIndex
-};
+export { setEnabledElement, getEnabledElement };

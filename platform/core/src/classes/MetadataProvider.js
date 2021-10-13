@@ -4,6 +4,7 @@ import dicomParser from 'dicom-parser';
 import getPixelSpacingInformation from '../utils/metadataProvider/getPixelSpacingInformation';
 import fetchPaletteColorLookupTableData from '../utils/metadataProvider/fetchPaletteColorLookupTableData';
 import fetchOverlayData from '../utils/metadataProvider/fetchOverlayData';
+import validNumber from '../utils/metadataProvider/validNumber';
 
 class MetadataProvider {
   constructor() {
@@ -20,6 +21,7 @@ class MetadataProvider {
       writable: false,
       value: new Map(),
     });
+    this.datasets = {};
   }
 
   async addInstance(dicomJSONDatasetOrP10ArrayBuffer, options = {}) {
@@ -52,16 +54,15 @@ class MetadataProvider {
       SOPInstanceUID,
     } = naturalizedDataset;
 
+    this._getAndCacheStudyDataset(StudyInstanceUID, dicomJSONDataset);
     const study = this._getAndCacheStudy(StudyInstanceUID);
     const series = this._getAndCacheSeriesFromStudy(study, SeriesInstanceUID);
     const instance = this._getAndCacheInstanceFromStudy(series, SOPInstanceUID);
 
     Object.assign(instance, naturalizedDataset);
 
-    if (options.server !== undefined) {
-      await this._checkBulkDataAndInlineBinaries(instance, options.server);
-    }
-    
+    await this._checkBulkDataAndInlineBinaries(instance, options.server);
+
     return instance;
   }
 
@@ -71,6 +72,16 @@ class MetadataProvider {
     // An example would be dicom hosted at some random site.
 
     this.imageIdToUIDs.set(imageId, uids);
+  }
+
+  _getAndCacheStudyDataset(StudyInstanceUID, dataset) {
+    if (!this.datasets[StudyInstanceUID]) {
+      this.datasets[StudyInstanceUID] = dataset;
+    }
+  }
+
+  getStudyDataset(StudyInstanceUID) {
+    return this.datasets[StudyInstanceUID];
   }
 
   _getAndCacheStudy(StudyInstanceUID) {
@@ -85,6 +96,7 @@ class MetadataProvider {
 
     return study;
   }
+
   _getAndCacheSeriesFromStudy(study, SeriesInstanceUID) {
     let series = study.series.get(SeriesInstanceUID);
 
@@ -219,26 +231,26 @@ class MetadataProvider {
         let columnCosines;
 
         if (PixelSpacing) {
-          rowPixelSpacing = PixelSpacing[0];
-          columnPixelSpacing = PixelSpacing[1];
+          rowPixelSpacing = validNumber(PixelSpacing[0]);
+          columnPixelSpacing = validNumber(PixelSpacing[1]);
         }
 
         if (ImageOrientationPatient) {
-          rowCosines = ImageOrientationPatient.slice(0, 3);
-          columnCosines = ImageOrientationPatient.slice(3, 6);
+          rowCosines = validNumber(ImageOrientationPatient.slice(0, 3));
+          columnCosines = validNumber(ImageOrientationPatient.slice(3, 6));
         }
 
         metadata = {
           frameOfReferenceUID: instance.FrameOfReferenceUID,
           rows: instance.Rows,
           columns: instance.Columns,
-          imageOrientationPatient: ImageOrientationPatient,
+          imageOrientationPatient: validNumber(ImageOrientationPatient),
           rowCosines,
           columnCosines,
-          imagePositionPatient: instance.ImagePositionPatient,
-          sliceThickness: instance.SliceThickness,
-          sliceLocation: instance.SliceLocation,
-          pixelSpacing: PixelSpacing,
+          imagePositionPatient: validNumber(instance.ImagePositionPatient),
+          sliceThickness: validNumber(instance.SliceThickness),
+          sliceLocation: validNumber(instance.SliceLocation),
+          pixelSpacing: validNumber(PixelSpacing),
           rowPixelSpacing,
           columnPixelSpacing,
         };
@@ -273,7 +285,7 @@ class MetadataProvider {
 
         break;
       case WADO_IMAGE_LOADER_TAGS.VOI_LUT_MODULE:
-        const { WindowCenter, WindowWidth } = instance;
+        let { WindowCenter, WindowWidth } = instance;
 
         const windowCenter = Array.isArray(WindowCenter)
           ? WindowCenter
@@ -283,15 +295,17 @@ class MetadataProvider {
           : [WindowWidth];
 
         metadata = {
-          windowCenter,
-          windowWidth,
+          windowCenter: validNumber(windowCenter),
+          windowWidth: validNumber(windowWidth),
         };
 
         break;
       case WADO_IMAGE_LOADER_TAGS.MODALITY_LUT_MODULE:
+        const rescaleSlope = validNumber(instance.RescaleSlope);
+        const rescaleIntercept = validNumber(instance.RescaleIntercept);
         metadata = {
-          rescaleIntercept: instance.RescaleIntercept,
-          rescaleSlope: instance.RescaleSlope,
+          rescaleIntercept,
+          rescaleSlope,
           rescaleType: instance.RescaleType,
         };
         break;
