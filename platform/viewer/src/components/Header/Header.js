@@ -3,27 +3,11 @@ import { Link, withRouter } from 'react-router-dom';
 import { withTranslation } from 'react-i18next';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
-import { Dropdown, AboutContent, withModal, Icon } from '@ohif/ui';
+import { Dropdown, AboutContent, withModal } from '@ohif/ui';
 //
 import { UserPreferences } from './../UserPreferences';
 import OHIFLogo from '../OHIFLogo/OHIFLogo.js';
 import './Header.css';
-//
-import { ICRHelpContent, ICRAboutContent } from '@xnat-ohif/extension-xnat';
-
-function OptionsElement(props) {
-  return (
-    <div style={{ display: 'flex' }}>
-      <Icon
-        name="xnat-settings"
-        width="18px"
-        height="18px"
-        // style={{ margin: '0 5 0 0' }}
-      />
-      <span style={{ marginLeft: 2 }}>Settings</span>
-    </div>
-  );
-}
 
 function Header(props) {
   const {
@@ -44,23 +28,14 @@ function Header(props) {
   useEffect(() => {
     const optionsValue = [
       {
-        title: t('ICR Help'),
-        icon: { name: 'xnat-help' },
+        title: t('About'),
+        icon: { name: 'info' },
         onClick: () =>
           show({
-            content: ICRHelpContent,
-            title: t('Using Contour & Mask Tools'),
+            content: AboutContent,
+            title: t('OHIF Viewer - About'),
           }),
       },
-      // {
-      //   title: t('About'),
-      //   icon: { name: 'info' },
-      //   onClick: () =>
-      //     show({
-      //       content: AboutContent,
-      //       title: t('OHIF Viewer - About'),
-      //     }),
-      // },
       {
         title: t('Preferences'),
         icon: {
@@ -70,15 +45,6 @@ function Header(props) {
           show({
             content: UserPreferences,
             title: t('User Preferences'),
-          }),
-      },
-      {
-        title: t('About'),
-        icon: { name: 'info' },
-        onClick: () =>
-          show({
-            content: ICRAboutContent,
-            title: t('OHIF-XNAT Viewer | About'),
           }),
       },
     ];
@@ -96,7 +62,7 @@ function Header(props) {
 
   return (
     <>
-      {/*<div className="notification-bar">{t('INVESTIGATIONAL USE ONLY')}</div>*/}
+      <div className="notification-bar">{t('INVESTIGATIONAL USE ONLY')}</div>
       <div
         className={classNames('entry-header', { 'header-big': useLargeLogo })}
       >
@@ -126,17 +92,8 @@ function Header(props) {
         </div>
 
         <div className="header-menu">
-          <span className="research-use">
-            {/*{t('DEV-RELEASE | INVESTIGATIONAL USE ONLY')}*/}
-            {/*{versionStr}*/}
-          </span>
-          <Dropdown
-            // titleElement={<OptionsElement />}
-            title={t('Options')}
-            list={options}
-            align="right"
-          />
-          {/*<Dropdown title={t('Options')} list={options} align="right" />*/}
+          <span className="research-use">{t('INVESTIGATIONAL USE ONLY')}</span>
+          <Dropdown title={t('Options')} list={options} align="right" />
         </div>
       </div>
     </>
@@ -159,7 +116,7 @@ Header.propTypes = {
 
 Header.defaultProps = {
   useLargeLogo: false,
-  children: <OHIFLogo />,
+  children: OHIFLogo(),
 };
 
 export default withTranslation(['Header', 'AboutModal'])(

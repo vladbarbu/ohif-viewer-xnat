@@ -28,28 +28,28 @@ const ToolContextMenu = ({
       action: ({ nearbyToolData, eventData }) =>
         onDelete(nearbyToolData, eventData),
     },
-    // {
-    //   label: 'Relabel',
-    //   actionType: 'setLabel',
-    //   action: ({ nearbyToolData, eventData }) => {
-    //     const { tool: measurementData } = nearbyToolData;
-    //     onSetLabel(eventData, measurementData);
-    //   },
-    // },
-    // {
-    //   actionType: 'setDescription',
-    //   action: ({ nearbyToolData, eventData }) => {
-    //     const { tool: measurementData } = nearbyToolData;
-    //     onSetDescription(eventData, measurementData);
-    //   },
-    // },
+    {
+      label: 'Relabel',
+      actionType: 'setLabel',
+      action: ({ nearbyToolData, eventData }) => {
+        const { tool: measurementData } = nearbyToolData;
+        onSetLabel(eventData, measurementData);
+      },
+    },
+    {
+      actionType: 'setDescription',
+      action: ({ nearbyToolData, eventData }) => {
+        const { tool: measurementData } = nearbyToolData;
+        onSetDescription(eventData, measurementData);
+      },
+    },
   ];
 
   const getDropdownItems = (eventData, isTouchEvent = false) => {
     const nearbyToolData = commandsManager.runCommand('getNearbyToolData', {
       element: eventData.element,
       canvasCoordinates: eventData.currentPoints.canvas,
-      availableToolTypes: [...toolTypes, 'ArrowAnnotate'],
+      availableToolTypes: toolTypes,
     });
 
     /*
@@ -58,8 +58,8 @@ const ToolContextMenu = ({
      */
     if (
       isTouchEvent &&
-      nearbyToolData //&&
-      //nearbyToolData.toolType === 'arrowAnnotate'
+      nearbyToolData &&
+      nearbyToolData.toolType === 'arrowAnnotate'
     ) {
       return;
     }
@@ -111,4 +111,4 @@ ToolContextMenu.defaultProps = {
   isTouchEvent: false,
 };
 
-export { ToolContextMenu, toolTypes };
+export default ToolContextMenu;

@@ -10,13 +10,11 @@ const getActiveServer = servers => {
 };
 
 const mapStateToProps = state => {
-  const { viewports, servers, activeTool, preferences } = state;
+  const { viewports, servers } = state;
   return {
     viewports: viewports.viewportSpecificData,
     activeViewportIndex: viewports.activeViewportIndex,
     activeServer: getActiveServer(servers),
-    activeTool: activeTool,
-    preferences: preferences,
   };
 };
 

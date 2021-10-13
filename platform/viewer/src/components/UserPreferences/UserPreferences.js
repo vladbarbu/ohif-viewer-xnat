@@ -7,7 +7,6 @@ import { TabComponents } from '@ohif/ui';
 import { HotkeysPreferences } from './HotkeysPreferences';
 import { WindowLevelPreferences } from './WindowLevelPreferences';
 import { GeneralPreferences } from './GeneralPreferences';
-import { ExperimentalFeatures } from './ExperimentalFeatures';
 
 import './UserPreferences.styl';
 
@@ -18,18 +17,13 @@ const tabs = [
     customProps: {},
   },
   {
-    name: 'Window Level',
-    Component: WindowLevelPreferences,
-    customProps: {},
-  },
-  {
     name: 'General',
     Component: GeneralPreferences,
     customProps: {},
   },
   {
-    name: 'Experimental Features',
-    Component: ExperimentalFeatures,
+    name: 'Window Level',
+    Component: WindowLevelPreferences,
     customProps: {},
   },
 ];

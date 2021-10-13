@@ -26,11 +26,6 @@
   font-size: 30px;
 }
 
-.header-logo-image-icr {
-  height: 30px;
-  font-size: 30px;
-}
-
 @media only screen and (max-width: 768px) {
   .header-logo-text {
     display: none;

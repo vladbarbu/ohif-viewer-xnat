@@ -184,7 +184,7 @@ describe('OHIF User Preferences', () => {
       cy.checkStudyRouteInViewer(
         '1.2.840.113619.2.5.1762583153.215519.978957063.78'
       );
-      cy.expectMinimumThumbnails(5);
+      cy.expectMinimumThumbnails(3);
       cy.initCommonElementsAliases();
 
       // Check if application is in Spanish
@@ -217,7 +217,7 @@ describe('OHIF User Preferences', () => {
       cy.checkStudyRouteInViewer(
         '1.2.840.113619.2.5.1762583153.215519.978957063.78'
       );
-      cy.expectMinimumThumbnails(5);
+      cy.expectMinimumThumbnails(3);
     });
 
     beforeEach(() => {
@@ -332,6 +332,7 @@ describe('OHIF User Preferences', () => {
       cy.get('@saveBtn')
         .scrollIntoView()
         .click();
+
 
       // Header should be in "English (USA)""
       cy.get('.research-use')
@@ -560,6 +561,13 @@ describe('OHIF User Preferences', () => {
         .scrollIntoView()
         .click();
 
+      // Close Success Message overlay (if displayed)
+      cy.get('body').then(body => {
+        if (body.find('.sb-closeIcon').length > 0) {
+          cy.get('.sb-closeIcon').click({ force: true });
+        }
+      });
+
       // Open User Preferences modal again
       cy.openPreferences();
 
@@ -583,7 +591,7 @@ describe('OHIF User Preferences', () => {
       cy.checkStudyRouteInViewer(
         '1.2.840.113619.2.5.1762583153.215519.978957063.78'
       );
-      cy.expectMinimumThumbnails(5);
+      cy.expectMinimumThumbnails(3);
     });
 
     beforeEach(() => {
@@ -668,6 +676,13 @@ describe('OHIF User Preferences', () => {
 
       // Save changes
       cy.get('@saveBtn').click();
+      // Close Success Message overlay (if displayed)
+      cy.get('body').then(body => {
+        if (body.find('.sb-closeIcon').length > 0) {
+          cy.get('.sb-closeIcon').click({ force: true });
+        }
+      });
+
       // Open User Preferences modal
       cy.openPreferences();
       // Navigate to Window Level tab
@@ -741,7 +756,7 @@ describe('OHIF User Preferences', () => {
 
       // Overlay information from 2nd viewport
       let second_viewport_overlay =
-        'div:nth-child(2) > div > div.viewport-element > div.ViewportOverlay > div.bottom-right.overlay-element > div';
+        'div:nth-child(2) > div > div.viewport-element > div.OHIFCornerstoneViewportOverlay > div.bottom-right.overlay-element > div';
 
       // Shift active viewport to Viewport #2
       cy.get('body').type('{rightarrow}');

@@ -13,7 +13,8 @@ import {
   ModalProvider,
   DialogProvider,
   OHIFModal,
-  ErrorBoundary
+  LoggerProvider,
+  ErrorBoundary,
 } from '@ohif/ui';
 
 import {
@@ -24,6 +25,7 @@ import {
   UINotificationService,
   UIModalService,
   UIDialogService,
+  LoggerService,
   MeasurementService,
   utils,
   redux as reduxOHIF,
@@ -141,6 +143,7 @@ class App extends Component {
       UIModalService,
       UIDialogService,
       MeasurementService,
+      LoggerService,
     ]);
     _initExtensions(
       [...defaultExtensions, ...extensions],
@@ -164,11 +167,12 @@ class App extends Component {
       UIDialogService,
       UIModalService,
       MeasurementService,
+      LoggerService,
     } = servicesManager.services;
 
     if (this._userManager) {
       return (
-        <ErrorBoundary context='App'>
+        <ErrorBoundary context="App">
           <Provider store={store}>
             <AppProvider config={this._appConfig}>
               <I18nextProvider i18n={i18n}>
@@ -176,18 +180,20 @@ class App extends Component {
                   <UserManagerContext.Provider value={this._userManager}>
                     <Router basename={routerBasename}>
                       <WhiteLabelingContext.Provider value={whiteLabeling}>
-                        <SnackbarProvider service={UINotificationService}>
-                          <DialogProvider service={UIDialogService}>
-                            <ModalProvider
-                              modal={OHIFModal}
-                              service={UIModalService}
-                            >
-                              <OHIFStandaloneViewer
-                                userManager={this._userManager}
-                              />
-                            </ModalProvider>
-                          </DialogProvider>
-                        </SnackbarProvider>
+                        <LoggerProvider service={LoggerService}>
+                          <SnackbarProvider service={UINotificationService}>
+                            <DialogProvider service={UIDialogService}>
+                              <ModalProvider
+                                modal={OHIFModal}
+                                service={UIModalService}
+                              >
+                                <OHIFStandaloneViewer
+                                  userManager={this._userManager}
+                                />
+                              </ModalProvider>
+                            </DialogProvider>
+                          </SnackbarProvider>
+                        </LoggerProvider>
                       </WhiteLabelingContext.Provider>
                     </Router>
                   </UserManagerContext.Provider>
@@ -200,19 +206,24 @@ class App extends Component {
     }
 
     return (
-      <ErrorBoundary context='App'>
+      <ErrorBoundary context="App">
         <Provider store={store}>
           <AppProvider config={this._appConfig}>
             <I18nextProvider i18n={i18n}>
               <Router basename={routerBasename}>
                 <WhiteLabelingContext.Provider value={whiteLabeling}>
-                  <SnackbarProvider service={UINotificationService}>
-                    <DialogProvider service={UIDialogService}>
-                      <ModalProvider modal={OHIFModal} service={UIModalService}>
-                        <OHIFStandaloneViewer />
-                      </ModalProvider>
-                    </DialogProvider>
-                  </SnackbarProvider>
+                  <LoggerProvider service={LoggerService}>
+                    <SnackbarProvider service={UINotificationService}>
+                      <DialogProvider service={UIDialogService}>
+                        <ModalProvider
+                          modal={OHIFModal}
+                          service={UIModalService}
+                        >
+                          <OHIFStandaloneViewer />
+                        </ModalProvider>
+                      </DialogProvider>
+                    </SnackbarProvider>
+                  </LoggerProvider>
                 </WhiteLabelingContext.Provider>
               </Router>
             </I18nextProvider>
@@ -271,17 +282,21 @@ function _initExtensions(extensions, cornerstoneExtensionConfig, appConfig) {
     api: {
       contexts: CONTEXTS,
       hooks: {
-        useAppContext
-      }
-    }
+        useAppContext,
+      },
+    },
   });
 
   const requiredExtensions = [
     GenericViewerCommands,
     [OHIFCornerstoneExtension, cornerstoneExtensionConfig],
-    /* WARNING: MUST BE REGISTERED _AFTER_ OHIFCornerstoneExtension */
-    MeasurementsPanel,
   ];
+
+  if (appConfig.disableMeasurementPanel !== true) {
+    /* WARNING: MUST BE REGISTERED _AFTER_ OHIFCornerstoneExtension */
+    requiredExtensions.push(MeasurementsPanel);
+  }
+
   const mergedExtensions = requiredExtensions.concat(extensions);
   extensionManager.registerExtensions(mergedExtensions);
 }

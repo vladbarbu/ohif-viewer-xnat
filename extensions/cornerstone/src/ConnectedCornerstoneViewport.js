@@ -2,7 +2,7 @@ import CornerstoneViewport from 'react-cornerstone-viewport';
 import OHIF from '@ohif/core';
 import { connect } from 'react-redux';
 import throttle from 'lodash.throttle';
-import { setEnabledElement, setActiveViewportIndex, getActiveViewportIndex } from './state';
+import { setEnabledElement } from './state';
 
 const { setViewportActive, setViewportSpecificData } = OHIF.redux.actions;
 const {
@@ -32,9 +32,6 @@ const mapStateToProps = (state, ownProps) => {
   // If this is the active viewport, enable prefetching.
   const { viewportIndex } = ownProps; //.viewportData;
   const isActive = viewportIndex === state.viewports.activeViewportIndex;
-  if (isActive) {
-    setActiveViewportIndex(viewportIndex);
-  }
   const viewportSpecificData =
     state.viewports.viewportSpecificData[viewportIndex] || {};
 
@@ -56,7 +53,11 @@ const mapStateToProps = (state, ownProps) => {
     // Currently justing using escape hatch + commands
     // activeTool: activeButton && activeButton.command,
     ...dataFromStore,
-    isStackPrefetchEnabled: isActive,
+    isStackPrefetchEnabled: ownProps.hasOwnProperty('isStackPrefetchEnabled')
+      ? ownProps.isStackPrefetchEnabled
+      : ownProps.stackPrefetch
+      ? ownProps.stackPrefetch.enabled
+      : isActive,
     isPlaying,
     frameRate,
     //stack: viewportSpecificData.stack,
@@ -69,10 +70,7 @@ const mapDispatchToProps = (dispatch, ownProps) => {
 
   return {
     setViewportActive: () => {
-      // Fire dispatch only when switching viewports
-      if (viewportIndex !== getActiveViewportIndex()) {
-        dispatch(setViewportActive(viewportIndex));
-      }
+      dispatch(setViewportActive(viewportIndex));
     },
 
     setViewportSpecificData: data => {

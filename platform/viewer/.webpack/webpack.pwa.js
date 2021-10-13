@@ -12,18 +12,15 @@ const CopyWebpackPlugin = require('copy-webpack-plugin');
 const ExtractCssChunksPlugin = require('extract-css-chunks-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const { InjectManifest } = require('workbox-webpack-plugin');
-const TerserJSPlugin = require('terser-webpack-plugin');
-const OptimizeCSSAssetsPlugin = require('optimize-css-assets-webpack-plugin');
 // ~~ Rules
 const extractStyleChunksRule = require('./rules/extractStyleChunks.js');
 // ~~ Directories
 const SRC_DIR = path.join(__dirname, '../src');
 const DIST_DIR = path.join(__dirname, '../dist');
-const ROOT_MODULES_DIR = path.join(__dirname, '../../../node_modules');
 const PUBLIC_DIR = path.join(__dirname, '../public');
 // ~~ Env Vars
 const HTML_TEMPLATE = process.env.HTML_TEMPLATE || 'index.html';
-const PUBLIC_URL = process.env.PUBLIC_URL || '';
+const PUBLIC_URL = process.env.PUBLIC_URL || '/';
 const APP_CONFIG = process.env.APP_CONFIG || 'config/default.js';
 const PROXY_TARGET = process.env.PROXY_TARGET;
 const PROXY_DOMAIN = process.env.PROXY_DOMAIN;
@@ -42,15 +39,26 @@ module.exports = (env, argv) => {
       path: DIST_DIR,
       filename: isProdBuild ? '[name].bundle.[chunkhash].js' : '[name].js',
       publicPath: PUBLIC_URL, // Used by HtmlWebPackPlugin for asset prefix
+      devtoolModuleFilenameTemplate: function(info) {
+        if (isProdBuild) {
+          return `webpack:///${info.resourcePath}`;
+        } else {
+          return 'file:///' + encodeURI(info.absoluteResourcePath);
+        }
+      },
+    },
+    resolve: {
+      // We use this alias and the CopyPlugin below to support using the dynamic-import version
+      // of WADO Image Loader, but only when building a PWA. When we build a package, we must use the
+      // bundled version of WADO Image Loader so we can produce a single file for the viewer.
+      // (Note: script-tag version of the viewer will no longer be supported in OHIF v3)
+      alias: {
+        'cornerstone-wado-image-loader':
+          'cornerstone-wado-image-loader/dist/dynamic-import/cornerstoneWADOImageLoader.min.js',
+      },
     },
     module: {
       rules: [...extractStyleChunksRule(isProdBuild)],
-    },
-    resolve: {
-      // Fix itkModulesPath - https://github.com/InsightSoftwareConsortium/itk-js/issues/140
-      alias: {
-        './itkConfig$': `${PUBLIC_DIR}/config/itkConfig.js`,
-      }
     },
     plugins: [
       // Uncomment to generate bundle analyzer
@@ -78,14 +86,10 @@ module.exports = (env, argv) => {
           from: `${PUBLIC_DIR}/${APP_CONFIG}`,
           to: `${DIST_DIR}/app-config.js`,
         },
-        // ITK - https://insightsoftwareconsortium.github.io/itk-js/examples/webpack.html
         {
-          from: `${ROOT_MODULES_DIR}/itk/WebWorkers`,
-          to: `${DIST_DIR}/itk/WebWorkers`,
-        },
-        {
-          from: `${ROOT_MODULES_DIR}/itk/ImageIOs`,
-          to: `${DIST_DIR}/itk/ImageIOs`,
+          from:
+            '../../../node_modules/cornerstone-wado-image-loader/dist/dynamic-import',
+          to: DIST_DIR,
         },
       ]),
       // https://github.com/faceyspacey/extract-css-chunks-webpack-plugin#webpack-4-standalone-installation
@@ -111,6 +115,15 @@ module.exports = (env, argv) => {
         // maximumFileSizeToCacheInBytes: 4 * 1024 * 1024
       }),
     ],
+    optimization: {
+      splitChunks: {
+        // include all types of chunks
+        chunks: 'all',
+      },
+      //runtimeChunk: 'single',
+      minimize: isProdBuild,
+      sideEffects: true,
+    },
     // https://webpack.js.org/configuration/dev-server/
     devServer: {
       // gzip compression of everything served
@@ -128,38 +141,6 @@ module.exports = (env, argv) => {
       },
     },
   });
-
-  if (APP_CONFIG === 'config/xnat-dev.js') {
-    const XNAT_DOMAIN = process.env.XNAT_DOMAIN;
-    const XNAT_PROXY = process.env.XNAT_PROXY;
-    if (XNAT_DOMAIN && XNAT_PROXY) {
-      mergedConfig.devServer.proxy = {};
-      const pr = `^${XNAT_PROXY}`;
-      mergedConfig.devServer.proxy[XNAT_PROXY] = {
-        target: XNAT_DOMAIN,
-        changeOrigin: true,
-        // pathRewrite: { [pr]: '' },
-        pathRewrite: function(path, req) {
-          let newPath = path.replace(XNAT_PROXY, '');
-          console.log(`## devServer.proxy: ${pr} ${path} __ ${newPath}`)
-          return newPath;
-        },
-        onProxyRes: function (proxyRes, req, res) {
-          proxyRes.headers['Access-Control-Allow-Origin'] = '*';
-          proxyRes.headers['Access-Control-Allow-Headers'] = 'X-Requested-With,content-type,Authorization,JSESSIONID';
-          proxyRes.headers['Access-Control-Allow-Methods'] = 'GET,PUT,POST,DELETE';
-          proxyRes.headers['Access-Control-Allow-Credentials'] = 'true';
-        },
-      };
-      // mergedConfig.devServer.headers = {};
-      // mergedConfig.devServer.headers = {
-      //   'Access-Control-Allow-Origin': '*',
-      //   'Access-Control-Allow-Headers': 'X-Requested-With,content-type,Authorization,JSESSIONID',
-      //   'Access-Control-Allow-Methods': 'GET,PUT,POST,DELETE',
-      //   'Access-Control-Allow-Credentials': 'true',
-      // };
-    }
-  }
 
   if (hasProxy) {
     mergedConfig.devServer.proxy = {};
